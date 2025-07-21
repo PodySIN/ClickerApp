@@ -109,4 +109,6 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 STATIC_URL = '/static/'
 
+AUTH_USER_MODEL = "users.User"
+
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
