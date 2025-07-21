@@ -8,6 +8,10 @@ COPY . /usr/src/app
 
 RUN uv sync --group prod --frozen --no-cache
 ENV PATH="/usr/src/app/.venv/bin:$PATH"
+
+COPY ./entrypoint.sh .
+RUN chmod +x /usr/src/app/entrypoint.sh
+
 EXPOSE 8080
 
 ENTRYPOINT ["/usr/src/app/entrypoint.sh"]
