@@ -3,10 +3,11 @@ from rest_framework.views import APIView
 from .serializers import UserSerializer
 from .models import User
 from utils.database_requests import get_value_from_model, get_all_objects_from_model
-
-
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
 class UsersAPIView(APIView):
 
+    @method_decorator(cache_page(60*15))
     def get(self, request, id=None):
         if id:
             user = get_value_from_model(User, id=id)
@@ -20,6 +21,14 @@ class UsersAPIView(APIView):
             serializer = UserSerializer(users, many=True)
             return Response(serializer.data, status=200)
 
+    def post(self, request):
+        serializer = UserSerializer(data=request.data)
+        if serializer.is_valid():
+            user = serializer.save()
+            user.save()
+            return Response({"detail": "Пользователь успешно создан!"}, status=200)
+        return Response({"detail": serializer.errors}, status=400)
+    
     def delete(self, request, id):
         user = get_value_from_model(User, id=id)
         if user:
