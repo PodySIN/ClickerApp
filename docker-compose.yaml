@@ -59,9 +59,13 @@ services:
     image: redis:alpine
     container_name: redis
     expose:
-      - 6379
+      - $REDIS_PORT
     volumes:
-      - redis_data:/data
+      - .redis_data:/data
+    env_file:
+      - ./backend/.env
+    environment:
+      - REDIS_PORT=${REDIS_PORT}
     restart: unless-stopped
     networks:
       - clicker-network
