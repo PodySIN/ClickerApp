@@ -61,7 +61,7 @@ services:
     expose:
       - $REDIS_PORT
     volumes:
-      - .redis_data:/data
+      - redis_data:/data
     env_file:
       - ./backend/.env
     environment:
