@@ -14,6 +14,7 @@ ALLOWED_HOSTS = ["*"]
 
 INSTALLED_APPS = [
     "debug_toolbar",
+    "django_celery_beat",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -23,7 +24,6 @@ INSTALLED_APPS = [
     "rest_framework",
     "drf_spectacular",
     "corsheaders",
-    "levels",
     "users",
 ]
 
@@ -69,19 +69,28 @@ DATABASES = {
     }
 }
 
-REDIS_HOST = os.getenv("REDIS_HOST", "redis")
-REDIS_PORT = os.getenv("REDIS_PORT", "6379")
-REDIS_DB = os.getenv("REDIS_DB", "0")
+REDIS_CACHE_HOST = os.getenv("REDIS_CACHE_HOST", "redis-cache")
+REDIS_CELERY_HOST = os.getenv("REDIS_CELERY_HOST", "redis-celery")
+REDIS_CACHE_PORT = os.getenv("REDIS_CACHE_PORT", "6379")
+REDIS_CELERY_PORT = os.getenv("REDIS_CELERY_PORT", "6378")
+REDIS_CACHE_DB = os.getenv("REDIS_CACHE_DB", "0")
+REDIS_CELERY_DB = os.getenv("REDIS_CELERY_DB", "0")
 
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": f"redis://{REDIS_HOST}:{REDIS_PORT}/{REDIS_DB}",
+        "LOCATION": f"redis://{REDIS_CACHE_HOST}:{REDIS_CACHE_PORT}/{REDIS_CACHE_DB}",
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
         },
     }
 }
+
+CELERY_BROKER_URL = f"redis://{REDIS_CELERY_HOST}:{REDIS_CELERY_PORT}/{REDIS_CELERY_DB}"
+CELERY_RESULT_BACKEND = f"redis://{REDIS_CELERY_HOST}:{REDIS_CELERY_PORT}/{REDIS_CELERY_DB}"
+CELERY_TIMEZONE = 'Europe/Moscow'
+CELERY_ENABLE_UTC = True
+CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
 
 
 AUTH_PASSWORD_VALIDATORS = [

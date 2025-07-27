@@ -1,89 +1,92 @@
 from rest_framework import serializers
 from .models import User
-from levels.models import Level
 
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ["id", "level", "experience", "stars", "current_clicks"]
+        fields = ["id", "username", "level", "stars", "invited_by", "energy", "rank"]
         extra_kwargs = {
             "id": {
                 "help_text": "Уникальный id пользователя (телеграмм id)",
                 "label": "id",
                 "min_value": 1,
             },
+            "username": {
+                "help_text": "Имя пользователя",
+                "label": "Username",
+                "max_length": 100,
+            },
             "level": {
                 "help_text": "Уровень пользователя",
                 "label": "Level",
-            },
-            "experience": {
-                "help_text": "Количество опыта пользователя",
-                "label": "Experience",
                 "min_value": 1,
             },
             "stars": {
                 "help_text": "Количество звезд у пользователя (валюты)",
                 "label": "Stars",
-                "min_value": 1,
+                "min_value": 0,
             },
-            "current_clicks": {
-                "help_text": "Количество кликов по звездочке в данный момент",
-                "label": "Clicks",
-                "min_value": 1,
+            "invited_by": {
+                "help_text": "ID пользователя, который пригласил",
+                "label": "Invited By",
+                "min_value": 0,
+            },
+            "energy": {
+                "help_text": "Количество энергии пользователя",
+                "label": "Energy",
+                "min_value": 0,
+            },
+            "rank": {
+                "help_text": "Ранг пользователя (bronze3, silver1 и т.д.)",
+                "label": "Rank",
             },
         }
 
     def validate_id(self, value: int) -> int:
-        """Проверяет, что id является положительным числом."""
         if value < 1:
             raise serializers.ValidationError("id должен быть положительным числом")
         if User.objects.filter(id=value).exists():
             raise serializers.ValidationError(
-                {"level": f"Пользователь с таким id: {value}, уже существует"}
+                f"Пользователь с таким id: {value}, уже существует"
             )
         return value
 
-    def validate_level(self, value: Level) -> int:
-        """Проверяет, что level является положительным числом."""
-        if value.level < 1:
+    def validate_level(self, value: int) -> int:
+        if value < 1:
             raise serializers.ValidationError("level должен быть положительным числом")
         return value
 
-    def validate_experience(self, value: int) -> int:
-        """Проверяет, что experience является положительным числом."""
-        if value < 0:
-            raise serializers.ValidationError("experience должен быть положительным числом")
-        return value
-
-    def validate_stars(self, value: int) -> int:
-        """Проверяет, что звезды пользователя являются положительным числом."""
+    def validate_stars(self, value: float) -> float:
         if value < 0:
             raise serializers.ValidationError(
-                "Звезды пользователя должны быть положительным числом"
+                "Звезды пользователя должны быть неотрицательным числом"
             )
         return value
 
-    def validate_current_clicks(self, value: int) -> int:
-        """Проверяет, что current_clicks является положительным числом."""
+    def validate_invited_by(self, value: int) -> int:
         if value < 0:
-            raise serializers.ValidationError("Сurrent_clicks должно быть положительным числом!")
+            raise serializers.ValidationError(
+                "ID пригласившего должен быть неотрицательным числом"
+            )
+        if value != 0 and not User.objects.filter(id=value).exists():
+            raise serializers.ValidationError(
+                f"Пользователь с id {value} (пригласивший) не существует"
+            )
+        return value
+
+    def validate_energy(self, value: int) -> int:
+        if value < 0:
+            raise serializers.ValidationError("Energy должно быть неотрицательным числом")
+        return value
+
+    def validate_rank(self, value):
+        valid_ranks = [choice[0] for choice in User.RANK_CHOICES]
+        if value not in valid_ranks:
+            raise serializers.ValidationError("Неверное значение ранга")
         return value
 
     def create(self, validated_data: dict) -> User:
-        """
-        Создает нового пользователя с проверкой уникальности номера уровня.
-
-        Args:
-            validated_data: Валидированные данные для создания уровня
-
-        Returns:
-            Созданный объект User
-
-        Raises:
-            ValidationError: Если пользователь с таким номером уже существует
-        """
-
         instance = User(**validated_data)
         instance.save()
         return instance
@@ -92,75 +95,27 @@ class UserSerializer(serializers.ModelSerializer):
 class UserUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ["id", "level", "experience", "stars", "current_clicks"]
+        fields = ["id", "username", "level", "stars", "invited_by", "energy", "rank"]
         read_only_fields = ("id",)
         extra_kwargs = {
-            "level": {
-                "help_text": "Уровень пользователя",
-                "label": "Level",
-            },
-            "experience": {
-                "help_text": "Количество опыта пользователя",
-                "label": "Experience",
-                "min_value": 1,
-            },
-            "stars": {
-                "help_text": "Количество звезд у пользователя (валюты)",
-                "label": "Stars",
-                "min_value": 1,
-            },
-            "current_clicks": {
-                "help_text": "Количество кликов по звездочке в данный момент",
-                "label": "Clicks",
-                "min_value": 1,
-            },
+            "username": {"max_length": 100},
+            "level": {"min_value": 1},
+            "stars": {"min_value": 0},
+            "invited_by": {"min_value": 0},
+            "energy": {"min_value": 0},
         }
 
-    def validate_level(self, value: Level) -> int:
-        """Проверяет, что level является положительным числом."""
-        if value.level < 1:
-            raise serializers.ValidationError("level должен быть положительным числом")
-        return value
-
-    def validate_experience(self, value: int) -> int:
-        """Проверяет, что experience является положительным числом."""
-        if value < 0:
-            raise serializers.ValidationError("experience должен быть положительным числом")
-        return value
-
-    def validate_stars(self, value: int) -> int:
-        """Проверяет, что звезды пользователя являются положительным числом."""
-        if value < 0:
-            raise serializers.ValidationError(
-                "Звезды пользователя должны быть положительным числом"
-            )
-        return value
-
-    def validate_current_clicks(self, value: int) -> int:
-        """Проверяет, что current_clicks является положительным числом."""
-        if value < 0:
-            raise serializers.ValidationError("Сurrent_clicks должно быть положительным числом!")
-        return value
+    def validate(self, data):
+        # Проверка invited_by при обновлении
+        if 'invited_by' in data and data['invited_by'] != 0:
+            if not User.objects.filter(id=data['invited_by']).exists():
+                raise serializers.ValidationError(
+                    {"invited_by": f"Пользователь с id {data['invited_by']} не существует"}
+                )
+        return data
 
     def update(self, instance: User, validated_data: dict) -> User:
-        """
-        Обновляет существующего пользователя.
-
-        Args:
-            instance: Объект User для обновления
-            validated_data: Валидированные данные для обновления
-
-        Returns:
-            Обновленный объект User
-        """
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
         instance.save()
         return instance
-
-    def partial_update(self, instance: User, validated_data: dict) -> User:
-        """
-        Частично обновляет существующего пользователя.
-        (Алиас для update с partial=True)
-        """
-        return self.update(instance, validated_data)

@@ -2,17 +2,34 @@ version: '3.8'
 
 services:
   backend:
-    build: ./backend
+    build: 
+      context: ./backend
+      dockerfile: dockerfile.django
     container_name: backend
     working_dir: /usr/src/app
     volumes:
       - django_static_volume:/usr/src/app/static
       - django_media_volume:/usr/src/app/media
     restart: always
-    
     depends_on:
       - db
       - redis
+    tty: true
+    stdin_open: true
+    env_file:
+      - ./backend/.env
+    networks:
+      - clicker-network
+  celery:
+    build: 
+      context: ./backend
+      dockerfile: dockerfile.celery
+    container_name: celery
+    working_dir: /usr/src/app
+    command: celery -A core worker --beat --loglevel=info
+    depends_on:
+      - redis
+    restart: always
     tty: true
     stdin_open: true
     env_file:
@@ -58,6 +75,7 @@ services:
   redis:
     image: redis:alpine
     container_name: redis
+    command: redis-server --bind 0.0.0.0
     expose:
       - $REDIS_PORT
     volumes:
@@ -69,7 +87,6 @@ services:
     restart: unless-stopped
     networks:
       - clicker-network
-
     
 volumes:
   postgres_data:
