@@ -100,7 +100,6 @@ from utils.paginators import CustomPageNumberPagination
                             "invited_by": 987654321,
                             "energy": 200,
                             "rank": "silver1",
-                            
                         },
                         {
                             "id": 987654321,
@@ -207,7 +206,7 @@ class UserListCreateAPIView(APIView):
             queryset = queryset.filter(invited_by=invited_by)
         if rank := request.query_params.get("rank"):
             queryset = queryset.filter(rank=rank.lower())
-        
+
         # Сортировка
         sort_by = request.query_params.get("sort_by", "id")
         valid_sort_fields = ["id", "username", "level", "stars", "invited_by", "energy", "rank"]
@@ -509,22 +508,14 @@ class UserRetrieveUpdateAPIView(APIView):
                 status=status.HTTP_404_NOT_FOUND,
             )
 
-        serializer = self.serializer_class(
-            user, 
-            data=request.data, 
-            partial=partial
-        )
+        serializer = self.serializer_class(user, data=request.data, partial=partial)
 
         if not serializer.is_valid():
             return Response(
-                {
-                    "status": "error", 
-                    "message": "Ошибка валидации", 
-                    "data": serializer.errors
-                },
+                {"status": "error", "message": "Ошибка валидации", "data": serializer.errors},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        
+
         serializer.save()
         return Response(
             {
@@ -534,3 +525,24 @@ class UserRetrieveUpdateAPIView(APIView):
             },
             status=status.HTTP_200_OK,
         )
+
+
+from .serializers import AdminCreateSerializer
+
+
+class CreateAdminView(APIView):
+    """
+    Создание нового администратора системы
+    Требует аутентификации и прав администратора
+    """
+
+    serializer_class = AdminCreateSerializer
+
+    def post(self, request, format=None):
+        serializer = self.serializer_class(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(
+                {"message": "Администратор успешно создан"}, status=status.HTTP_201_CREATED
+            )
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

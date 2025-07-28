@@ -15,6 +15,8 @@ ALLOWED_HOSTS = ["*"]
 INSTALLED_APPS = [
     "debug_toolbar",
     "django_celery_beat",
+    "unfold",
+    "unfold.contrib.filters",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -89,7 +91,7 @@ CACHES = {
 CELERY_BROKER_URL = f"redis://{REDIS_CELERY_HOST}:{REDIS_CELERY_PORT}/{REDIS_CELERY_DB}"
 CELERY_RESULT_BACKEND = f"redis://{REDIS_CELERY_HOST}:{REDIS_CELERY_PORT}/{REDIS_CELERY_DB}"
 CELERY_ENABLE_UTC = True
-CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
+CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
 
 
 AUTH_PASSWORD_VALIDATORS = [
@@ -98,6 +100,9 @@ AUTH_PASSWORD_VALIDATORS = [
     },
     {
         "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
+        "OPTIONS": {
+            "min_length": 8,
+        },
     },
     {
         "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
@@ -140,7 +145,12 @@ CORS_ALLOW_HEADERS = [
     "access-control-allow-origin",
     "X-Telegram-InitData",
     "x-telegram-initdata",
-    'Access-Control-Allow-Origin',
+    "Access-Control-Allow-Origin",
+]
+
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost:80",
+    "http://127.0.0.1:80",
 ]
 
 MEDIA_URL = "/media/"
@@ -161,4 +171,25 @@ SPECTACULAR_SETTINGS = {
     "DESCRIPTION": "Clicker App API",
     "VERSION": "1.0.0",
     "SERVE_INCLUDE_SCHEMA": False,
+}
+
+UNFOLD = {
+    "SITE_TITLE": "Админка тапалки",
+    "SITE_HEADER": "Администрирование",
+    "SITE_URL": "/",
+    "THEME": "dark",
+    "COLORS": {
+        "primary": {
+            "50": "250 245 255",
+            "100": "243 232 255",
+            "200": "233 213 255",
+            "300": "216 180 254",
+            "400": "192 132 252",
+            "500": "168 85 247",
+            "600": "147 51 234",
+            "700": "126 34 206",
+            "800": "107 33 168",
+            "900": "88 28 135",
+        },
+    },
 }

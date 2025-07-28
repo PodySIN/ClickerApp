@@ -46,15 +46,13 @@ class UserSerializer(serializers.ModelSerializer):
                 "label": "Last Update",
             },
         }
-        read_only_fields = ("last_update", )
+        read_only_fields = ("last_update",)
 
     def validate_id(self, value: int) -> int:
         if value < 1:
             raise serializers.ValidationError("id должен быть положительным числом")
         if User.objects.filter(id=value).exists():
-            raise serializers.ValidationError(
-                f"Пользователь с таким id: {value}, уже существует"
-            )
+            raise serializers.ValidationError(f"Пользователь с таким id: {value}, уже существует")
         return value
 
     def validate_level(self, value: int) -> int:
@@ -71,9 +69,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     def validate_invited_by(self, value: int) -> int:
         if value < 0:
-            raise serializers.ValidationError(
-                "ID пригласившего должен быть неотрицательным числом"
-            )
+            raise serializers.ValidationError("ID пригласившего должен быть неотрицательным числом")
         if value != 0 and not User.objects.filter(id=value).exists():
             raise serializers.ValidationError(
                 f"Пользователь с id {value} (пригласивший) не существует"
@@ -109,12 +105,12 @@ class UserUpdateSerializer(serializers.ModelSerializer):
             "invited_by": {"min_value": 0},
             "energy": {"min_value": 0},
         }
-        read_only_fields = ("last_update", )
+        read_only_fields = ("last_update",)
 
     def validate(self, data):
         # Проверка invited_by при обновлении
-        if 'invited_by' in data and data['invited_by'] != 0:
-            if not User.objects.filter(id=data['invited_by']).exists():
+        if "invited_by" in data and data["invited_by"] != 0:
+            if not User.objects.filter(id=data["invited_by"]).exists():
                 raise serializers.ValidationError(
                     {"invited_by": f"Пользователь с id {data['invited_by']} не существует"}
                 )
@@ -125,3 +121,51 @@ class UserUpdateSerializer(serializers.ModelSerializer):
             setattr(instance, attr, value)
         instance.save()
         return instance
+
+
+from django.contrib.auth.models import User
+from django.contrib.auth.hashers import make_password
+
+
+class AdminCreateSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(
+        write_only=True,
+        required=True,
+        style={"input_type": "password"},
+        min_length=8,
+        help_text="Пароль должен быть не менее 8 символов",
+    )
+    password2 = serializers.CharField(
+        write_only=True, style={"input_type": "password"}, help_text="Повторите тот же пароль"
+    )
+
+    class Meta:
+        model = User
+        fields = ["username", "email", "password", "password2"]
+        extra_kwargs = {"email": {"required": True}, "username": {"min_length": 3}}
+
+    def validate(self, attrs):
+        if attrs["password"] != attrs["password2"]:
+            raise serializers.ValidationError({"password": "Пароли не совпадают"})
+
+        if User.objects.filter(username=attrs["username"]).exists():
+            raise serializers.ValidationError(
+                {"username": "Пользователь с таким именем уже существует"}
+            )
+
+        if User.objects.filter(email=attrs["email"]).exists():
+            raise serializers.ValidationError(
+                {"email": "Пользователь с таким email уже существует"}
+            )
+
+        return attrs
+
+    def create(self, validated_data):
+        user = User.objects.create(
+            username=validated_data["username"],
+            email=validated_data["email"],
+            password=make_password(validated_data["password"]),
+            is_staff=True,
+            is_superuser=True,
+        )
+        return user
