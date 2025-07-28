@@ -5,7 +5,7 @@ from .models import User
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ["id", "username", "level", "stars", "invited_by", "energy", "rank"]
+        fields = ["id", "username", "level", "stars", "invited_by", "energy", "rank", "last_update"]
         extra_kwargs = {
             "id": {
                 "help_text": "Уникальный id пользователя (телеграмм id)",
@@ -41,7 +41,12 @@ class UserSerializer(serializers.ModelSerializer):
                 "help_text": "Ранг пользователя (bronze3, silver1 и т.д.)",
                 "label": "Rank",
             },
+            "last_update": {
+                "help_text": "Время, когда пользователя бы изменен последний раз",
+                "label": "Last Update",
+            },
         }
+        read_only_fields = ("last_update", )
 
     def validate_id(self, value: int) -> int:
         if value < 1:
@@ -95,7 +100,7 @@ class UserSerializer(serializers.ModelSerializer):
 class UserUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ["id", "username", "level", "stars", "invited_by", "energy", "rank"]
+        fields = ["id", "username", "level", "stars", "invited_by", "energy", "rank", "last_update"]
         read_only_fields = ("id",)
         extra_kwargs = {
             "username": {"max_length": 100},
@@ -104,6 +109,7 @@ class UserUpdateSerializer(serializers.ModelSerializer):
             "invited_by": {"min_value": 0},
             "energy": {"min_value": 0},
         }
+        read_only_fields = ("last_update", )
 
     def validate(self, data):
         # Проверка invited_by при обновлении

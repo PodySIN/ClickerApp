@@ -88,7 +88,6 @@ CACHES = {
 
 CELERY_BROKER_URL = f"redis://{REDIS_CELERY_HOST}:{REDIS_CELERY_PORT}/{REDIS_CELERY_DB}"
 CELERY_RESULT_BACKEND = f"redis://{REDIS_CELERY_HOST}:{REDIS_CELERY_PORT}/{REDIS_CELERY_DB}"
-CELERY_TIMEZONE = 'Europe/Moscow'
 CELERY_ENABLE_UTC = True
 CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
 
@@ -141,6 +140,7 @@ CORS_ALLOW_HEADERS = [
     "access-control-allow-origin",
     "X-Telegram-InitData",
     "x-telegram-initdata",
+    'Access-Control-Allow-Origin',
 ]
 
 MEDIA_URL = "/media/"

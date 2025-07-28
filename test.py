@@ -1,13 +1,24 @@
-from celery import shared_task
-from utils.database_requests import get_all_objects_from_model
-from .models import User
-
-
+users = [
+    {"id": 1, "stars": 150, "rank": "bronze3"},
+    {"id": 2, "stars": 120, "rank": "bronze3"},
+    {"id": 3, "stars": 100, "rank": "bronze3"},
+    {"id": 4, "stars": 100, "rank": "bronze3"},
+    {"id": 3, "stars": 123, "rank": "bronze3"},
+    {"id": 3, "stars": 45, "rank": "bronze3"},
+    {"id": 3, "stars": 1, "rank": "bronze3"},
+    {"id": 3, "stars": 678, "rank": "bronze3"},
+    {"id": 3, "stars": 12, "rank": "bronze3"},
+    {"id": 3, "stars": 46, "rank": "bronze3"},
+    {"id": 3, "stars": 87, "rank": "bronze3"},
+    {"id": 3, "stars": 123, "rank": "bronze3"},
+    {"id": 3, "stars": 5, "rank": "bronze3"},
+    {"id": 3, "stars": 76, "rank": "bronze3"},
+]
 def assign_rank_to_users(users, start_index, count, rank_name):
     """Присваивает указанный ранг заданному количеству пользователей"""
     end_index = start_index + count
     for i in range(start_index, min(end_index, len(users))):
-        users[i].rank = rank_name
+        users[i]["rank"] = rank_name
     return end_index
 
 def distribute_remaining_users(users, start_index, rank_groups):
@@ -21,15 +32,21 @@ def distribute_remaining_users(users, start_index, rank_groups):
         count = group_size + (1 if remainder > 0 else 0)
         current_index = assign_rank_to_users(users, current_index, count, rank_name)
         remainder -= 1 if remainder > 0 else 0
+    
     return current_index
 
 def calculate_user_ranks(users):
     """Основная функция для расчета рангов пользователей"""
     if not users:
         return []
+    
+    # Сортируем по убыванию звезд
+    users = sorted(users, key=lambda x: -x['stars'])
+    
+    # Топ-3 пользователя получают особые ранги
     top_ranks = ['Легенда', 'Элита', 'Мастер']
     for i in range(min(3, len(users))):
-        users[i].rank = top_ranks[i]
+        users[i]["rank"] = top_ranks[i]
     
     # Распределение остальных пользователей
     rank_groups = [
@@ -45,13 +62,6 @@ def calculate_user_ranks(users):
     assign_rank_to_users(users, current_index, len(users) - current_index, 'bronze 1')
     
     return users
-
-@shared_task
-def daily_refresh():
-    users = get_all_objects_from_model(User)
-    sorted_users = sorted(users, key=lambda x: (-x.stars, x.last_update))
-    users = calculate_user_ranks(sorted_users)
-    for user in users:
-        user.energy = 500
-        user.save()
-    return "Задача выполнена: Ранги и энергия обновились!"
+u = calculate_user_ranks(users)
+for i in u:
+    print('->', i)

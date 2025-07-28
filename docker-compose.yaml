@@ -28,6 +28,7 @@ services:
     working_dir: /usr/src/app
     command: celery -A core worker --beat --loglevel=info
     depends_on:
+      - db
       - redis
     restart: always
     tty: true
