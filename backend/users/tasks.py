@@ -1,6 +1,6 @@
 from celery import shared_task
 from utils.database_requests import get_all_objects_from_model
-from .models import User
+from .models import StandartUser
 
 
 def assign_rank_to_users(users, start_index, count, rank_name):
@@ -57,9 +57,8 @@ def calculate_user_ranks(users):
 
 @shared_task
 def daily_refresh():
-    users = get_all_objects_from_model(User)
-    sorted_users = sorted(users, key=lambda x: (-x.stars, x.last_update))
-    users = calculate_user_ranks(sorted_users)
+    users = get_all_objects_from_model(StandartUser).order_by('-stars', 'last_update')
+    users = calculate_user_ranks(users)
     for user in users:
         user.energy = 500
         user.save()

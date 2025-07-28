@@ -1,10 +1,10 @@
 from django.contrib import admin
 from unfold.admin import ModelAdmin
 from unfold.contrib.filters.admin import RangeNumericFilter
-from .models import User
+from .models import StandartUser
 
 
-@admin.register(User)
+@admin.register(StandartUser)
 class UserAdmin(ModelAdmin):
     # Список полей в таблице
     list_display = ("id", "username", "level", "stars", "rank", "energy", "last_update")

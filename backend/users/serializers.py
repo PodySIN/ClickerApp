@@ -1,10 +1,10 @@
 from rest_framework import serializers
-from .models import User
+from .models import StandartUser
 
 
-class UserSerializer(serializers.ModelSerializer):
+class StandartUserSerializer(serializers.ModelSerializer):
     class Meta:
-        model = User
+        model = StandartUser
         fields = ["id", "username", "level", "stars", "invited_by", "energy", "rank", "last_update"]
         extra_kwargs = {
             "id": {
@@ -51,7 +51,7 @@ class UserSerializer(serializers.ModelSerializer):
     def validate_id(self, value: int) -> int:
         if value < 1:
             raise serializers.ValidationError("id должен быть положительным числом")
-        if User.objects.filter(id=value).exists():
+        if StandartUser.objects.filter(id=value).exists():
             raise serializers.ValidationError(f"Пользователь с таким id: {value}, уже существует")
         return value
 
@@ -70,7 +70,7 @@ class UserSerializer(serializers.ModelSerializer):
     def validate_invited_by(self, value: int) -> int:
         if value < 0:
             raise serializers.ValidationError("ID пригласившего должен быть неотрицательным числом")
-        if value != 0 and not User.objects.filter(id=value).exists():
+        if value != 0 and not StandartUser.objects.filter(id=value).exists():
             raise serializers.ValidationError(
                 f"Пользователь с id {value} (пригласивший) не существует"
             )
@@ -82,20 +82,22 @@ class UserSerializer(serializers.ModelSerializer):
         return value
 
     def validate_rank(self, value):
-        valid_ranks = [choice[0] for choice in User.RANK_CHOICES]
+        print(StandartUser.objects.all())
+        valid_ranks = [choice[0] for choice in StandartUser.RANK_CHOICES]
+        
         if value not in valid_ranks:
             raise serializers.ValidationError("Неверное значение ранга")
         return value
 
-    def create(self, validated_data: dict) -> User:
-        instance = User(**validated_data)
+    def create(self, validated_data: dict) -> StandartUser:
+        instance = StandartUser(**validated_data)
         instance.save()
         return instance
 
 
-class UserUpdateSerializer(serializers.ModelSerializer):
+class StandartUserUpdateSerializer(serializers.ModelSerializer):
     class Meta:
-        model = User
+        model = StandartUser
         fields = ["id", "username", "level", "stars", "invited_by", "energy", "rank", "last_update"]
         read_only_fields = ("id",)
         extra_kwargs = {
@@ -110,13 +112,13 @@ class UserUpdateSerializer(serializers.ModelSerializer):
     def validate(self, data):
         # Проверка invited_by при обновлении
         if "invited_by" in data and data["invited_by"] != 0:
-            if not User.objects.filter(id=data["invited_by"]).exists():
+            if not StandartUser.objects.filter(id=data["invited_by"]).exists():
                 raise serializers.ValidationError(
                     {"invited_by": f"Пользователь с id {data['invited_by']} не существует"}
                 )
         return data
 
-    def update(self, instance: User, validated_data: dict) -> User:
+    def update(self, instance: StandartUser, validated_data: dict) -> StandartUser:
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
         instance.save()

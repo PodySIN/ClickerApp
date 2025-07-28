@@ -1,8 +1,8 @@
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status
-from .serializers import UserSerializer, UserUpdateSerializer
-from .models import User
+from .serializers import StandartUserSerializer, StandartUserUpdateSerializer
+from .models import StandartUser
 from utils.database_requests import get_value_from_model, get_all_objects_from_model
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
@@ -74,7 +74,7 @@ from utils.paginators import CustomPageNumberPagination
             ),
         ],
         responses={
-            200: UserSerializer(many=True),
+            200: StandartUserSerializer(many=True),
             400: OpenApiTypes.OBJECT,
         },
         examples=[
@@ -131,9 +131,9 @@ from utils.paginators import CustomPageNumberPagination
     post=extend_schema(
         summary="Создать нового пользователя",
         description="Создает нового пользователя с указанными характеристиками.",
-        request=UserSerializer,
+        request=StandartUserSerializer,
         responses={
-            201: UserSerializer,
+            201: StandartUserSerializer,
             400: OpenApiTypes.OBJECT,
         },
         examples=[
@@ -192,13 +192,13 @@ from utils.paginators import CustomPageNumberPagination
         ],
     ),
 )
-class UserListCreateAPIView(APIView):
-    serializer_class = UserSerializer
+class StandartUserListCreateAPIView(APIView):
+    serializer_class = StandartUserSerializer
     pagination_class = CustomPageNumberPagination
 
     @method_decorator(cache_page(60 * 15, key_prefix="user_list"))
     def get(self, request):
-        queryset = get_all_objects_from_model(User)
+        queryset = get_all_objects_from_model(StandartUser)
         # Фильтрация
         if username := request.query_params.get("username"):
             queryset = queryset.filter(username__icontains=username)
@@ -266,7 +266,7 @@ class UserListCreateAPIView(APIView):
             )
         ],
         responses={
-            200: UserSerializer,
+            200: StandartUserSerializer,
             404: OpenApiTypes.OBJECT,
         },
         examples=[
@@ -313,9 +313,9 @@ class UserListCreateAPIView(APIView):
                 examples=[OpenApiExample("Пример", value=123456789)],
             )
         ],
-        request=UserUpdateSerializer,
+        request=StandartUserUpdateSerializer,
         responses={
-            200: UserUpdateSerializer,
+            200: StandartUserUpdateSerializer,
             400: OpenApiTypes.OBJECT,
             404: OpenApiTypes.OBJECT,
         },
@@ -379,9 +379,9 @@ class UserListCreateAPIView(APIView):
                 examples=[OpenApiExample("Пример", value=123456789)],
             )
         ],
-        request=UserUpdateSerializer,
+        request=StandartUserUpdateSerializer,
         responses={
-            200: UserUpdateSerializer,
+            200: StandartUserUpdateSerializer,
             400: OpenApiTypes.OBJECT,
             404: OpenApiTypes.OBJECT,
         },
@@ -463,12 +463,12 @@ class UserListCreateAPIView(APIView):
         ],
     ),
 )
-class UserRetrieveUpdateAPIView(APIView):
-    serializer_class = UserUpdateSerializer
+class StandartUserRetrieveUpdateAPIView(APIView):
+    serializer_class = StandartUserUpdateSerializer
 
     @method_decorator(cache_page(60 * 15, key_prefix="user_detail"))
     def get(self, request, id):
-        user = get_value_from_model(User, id=id)
+        user = get_value_from_model(StandartUser, id=id)
         if not user:
             return Response(
                 {"status": "error", "message": "Пользователь не найден"},
@@ -491,7 +491,7 @@ class UserRetrieveUpdateAPIView(APIView):
         return self._update(request, id, partial=True)
 
     def delete(self, request, id):
-        user = get_value_from_model(User, id=id)
+        user = get_value_from_model(StandartUser, id=id)
         if not user:
             return Response(
                 {"status": "error", "message": "Пользователь не найден"},
@@ -501,7 +501,7 @@ class UserRetrieveUpdateAPIView(APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     def _update(self, request, id, partial=False):
-        user = get_value_from_model(User, id=id)
+        user = get_value_from_model(StandartUser, id=id)
         if not user:
             return Response(
                 {"status": "error", "message": "Пользователь не найден"},

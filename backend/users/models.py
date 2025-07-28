@@ -1,7 +1,7 @@
 from django.db import models
 
 
-class User(models.Model):
+class StandartUser(models.Model):
     RANK_CHOICES = [
         ("bronze 1", "Бронза 1"),
         ("bronze 2", "Бронза 2"),
@@ -24,5 +24,5 @@ class User(models.Model):
     stars = models.FloatField(default=0)
     invited_by = models.IntegerField(default=0)
     energy = models.IntegerField(default=500)
-    rank = models.CharField(max_length=20, choices=RANK_CHOICES, default="bronze3")
+    rank = models.CharField(choices=RANK_CHOICES, default="bronze3")
     last_update = models.DateTimeField(auto_now=True)
