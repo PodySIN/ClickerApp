@@ -90,6 +90,7 @@ CACHES = {
 
 CELERY_BROKER_URL = f"redis://{REDIS_CELERY_HOST}:{REDIS_CELERY_PORT}/{REDIS_CELERY_DB}"
 CELERY_RESULT_BACKEND = f"redis://{REDIS_CELERY_HOST}:{REDIS_CELERY_PORT}/{REDIS_CELERY_DB}"
+CELERY_TIME_ZONE = "Europe/Moscow"
 CELERY_ENABLE_UTC = True
 CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
 
@@ -112,13 +113,10 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-LANGUAGE_CODE = "en-us"
-
-TIME_ZONE = "UTC"
-
+LANGUAGE_CODE = "ru-ru"  # или 'ru'
+TIME_ZONE = "Europe/Moscow"
 USE_I18N = True
-
-USE_TZ = True
+USE_L10N = True
 
 
 CORS_ALLOW_CREDENTIALS = True
@@ -149,10 +147,7 @@ CORS_ALLOW_HEADERS = [
 ]
 
 CSRF_TRUSTED_ORIGINS = [
-    "http://localhost:8080",
-    "http://127.0.0.1:8000",
-    "http://127.0.0.1:80",
-    "http://localhost",
+    "http://localhost:80",
 ]
 
 MEDIA_URL = "/media/"

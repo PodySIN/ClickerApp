@@ -84,7 +84,7 @@ class StandartUserSerializer(serializers.ModelSerializer):
     def validate_rank(self, value):
         print(StandartUser.objects.all())
         valid_ranks = [choice[0] for choice in StandartUser.RANK_CHOICES]
-        
+
         if value not in valid_ranks:
             raise serializers.ValidationError("Неверное значение ранга")
         return value

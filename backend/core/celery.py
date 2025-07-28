@@ -12,7 +12,7 @@ app.autodiscover_tasks()
 app.conf.beat_schedule = {
     "daily-midnight-moscow": {
         "task": "users.tasks.daily_refresh",
-        "schedule": crontab(hour=14, minute=25),  ##crontab(hour=21, minute=0)
+        "schedule": crontab(hour=0, minute=0),  ##crontab(hour=21, minute=0)
         "args": (),
     },
 }

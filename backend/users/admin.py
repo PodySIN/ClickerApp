@@ -1,30 +1,33 @@
 from django.contrib import admin
 from unfold.admin import ModelAdmin
-from unfold.contrib.filters.admin import RangeNumericFilter
+from unfold.contrib.filters.admin import RangeNumericFilter, RangeDateTimeFilter
+from django.utils.translation import gettext_lazy as _
 from .models import StandartUser
+from unfold.decorators import action
 
 
 @admin.register(StandartUser)
 class UserAdmin(ModelAdmin):
-    # Список полей в таблице
-    list_display = ("id", "username", "level", "stars", "rank", "energy", "last_update")
-    list_display_links = ("id", "username")  # Кликабельные поля
 
-    # Фильтры (с поддержкой unfold)
+    verbose_name = _("Пользователя")
+    verbose_name_plural = _("Пользователи")
+
+    list_display = ("id", "username", "level", "stars", "rank", "energy", "last_update")
+    list_display_links = ("id", "username")
+    list_filter_submit = True
     list_filter = (
         "rank",
-        ("level", RangeNumericFilter),  # Числовой диапазон
+        ("level", RangeNumericFilter),
+        ("stars", RangeNumericFilter),
         ("energy", RangeNumericFilter),
+        ("last_update", RangeDateTimeFilter),
     )
 
-    # Поиск
     search_fields = ("id", "username", "invited_by")
-    search_help_text = "Поиск по ID, имени или ID пригласившего"
+    search_help_text = _("Поиск по ID, имени или ID пригласившего")  # Перевод подсказки
 
-    # Сортировка
-    ordering = ("-last_update",)
+    ordering = ("id",)
 
-    # Группировка полей в форме редактирования
     fieldsets = (
         (
             None,
@@ -34,30 +37,21 @@ class UserAdmin(ModelAdmin):
             },
         ),
         (
-            "Прогресс",
+            _("Прогресс"),  # Перевод названия секции
             {
                 "fields": ("level", "stars", "rank"),
                 "classes": ("collapse",),
             },
         ),
         (
-            "Энергия и рефералы",
+            _("Энергия и рефералы"),
             {
                 "fields": ("energy", "invited_by"),
             },
         ),
     )
 
-    # Только для чтения при редактировании
     def get_readonly_fields(self, request, obj=None):
-        if obj:  # Если объект уже существует
+        if obj:
             return ("id", "last_update")
         return ("last_update",)
-
-    # Кастомизация действий в списке
-    actions = ["reset_energy"]
-
-    @admin.action(description="Обнулить энергию")
-    def reset_energy(self, request, queryset):
-        queryset.update(energy=0)
-        self.message_user(request, f"Энергия обнулена для {queryset.count()} пользователей")
