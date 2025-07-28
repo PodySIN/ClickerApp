@@ -16,7 +16,7 @@ class User(models.Model):
         ('elite', 'Элита'),
         ('the_legend', 'Легенда'),
     ]
-    id = models.DecimalField(max_digits=15, decimal_places=2, blank=False, default=123456, primary_key=True)
+    id = models.DecimalField(max_digits=15, decimal_places=0, blank=False, default=123456, primary_key=True)
     username = models.CharField(default='username', blank=False)
     level = models.IntegerField(default=1)
     stars = models.FloatField(default=0)
