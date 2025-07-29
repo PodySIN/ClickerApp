@@ -16,6 +16,11 @@ services:
         condition: service_healthy
       redis:
         condition: service_started
+    healthcheck:
+      test: ["CMD-SHELL", "uv run manage.py migrate --check"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
     tty: true
     stdin_open: true
     env_file:
@@ -35,7 +40,7 @@ services:
       redis:
         condition: service_started
       backend:
-        condition: service_started
+        condition: service_healthy
     restart: always
     tty: true
     stdin_open: true

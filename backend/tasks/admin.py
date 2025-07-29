@@ -24,7 +24,7 @@ class TaskAdmin(ModelAdmin):
         (
             None,
             {
-                "fields": ("id", "title"),
+                "fields": ("title",),  # Убрали id из полей для создания
                 "classes": ("wide",),
             },
         ),
@@ -43,10 +43,18 @@ class TaskAdmin(ModelAdmin):
         ),
     )
 
-    def get_readonly_fields(self, request, obj=None):
+    def get_fieldsets(self, request, obj=None):
+        """Динамически добавляем id только при редактировании"""
+        fieldsets = super().get_fieldsets(request, obj)
         if obj:
-            return ("id",)
-        return ()
+            fieldsets[0][1]["fields"] = ("id",) + fieldsets[0][1]["fields"]
+        return fieldsets
+
+    def get_readonly_fields(self, request, obj=None):
+        """Делаем id доступным только для чтения при редактировании"""
+        if obj:
+            return super().get_readonly_fields(request, obj) + ("id",)
+        return super().get_readonly_fields(request, obj)
 
     def short_description(self, obj):
         """Укорачивает описание для отображения в списке"""
