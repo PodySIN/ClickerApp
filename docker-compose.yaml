@@ -12,8 +12,10 @@ services:
       - django_media_volume:/usr/src/app/media
     restart: always
     depends_on:
-      - db
-      - redis
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
     tty: true
     stdin_open: true
     env_file:
@@ -28,9 +30,12 @@ services:
     working_dir: /usr/src/app
     command: celery -A core worker --beat --loglevel=info
     depends_on:
-      - db
-      - redis
-      - backend
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      backend:
+        condition: service_started
     restart: always
     tty: true
     stdin_open: true
@@ -55,6 +60,11 @@ services:
       - POSTGRES_HOST_AUTH_METHOD=trust
     expose: 
       - 5432
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   nginx:
       build: ./nginx

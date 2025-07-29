@@ -6,10 +6,6 @@ then
     done
 fi
 
-uv run manage.py makemigrations users
-uv run manage.py makemigrations django_celery_beat
-uv run manage.py migrate users
-uv run manage.py migrate django_celery_beat
 uv run manage.py makemigrations
 uv run manage.py migrate
 uv run manage.py createcachetable
