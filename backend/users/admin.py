@@ -1,9 +1,8 @@
 from django.contrib import admin
 from unfold.admin import ModelAdmin
-from unfold.contrib.filters.admin import RangeNumericFilter, RangeDateTimeFilter
+from unfold.contrib.filters.admin import RangeNumericFilter
 from django.utils.translation import gettext_lazy as _
 from .models import StandartUser
-from unfold.decorators import action
 
 
 @admin.register(StandartUser)
@@ -20,7 +19,6 @@ class UserAdmin(ModelAdmin):
         ("level", RangeNumericFilter),
         ("stars", RangeNumericFilter),
         ("energy", RangeNumericFilter),
-        ("last_update", RangeDateTimeFilter),
     )
 
     search_fields = ("id", "username", "invited_by")
